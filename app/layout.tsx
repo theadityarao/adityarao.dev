@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Space_Grotesk } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import Link from 'next/link';
+import { ThemeToggle } from './components/theme-toggle';
 
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] });
 
@@ -36,7 +37,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.className}`}>
+    <html lang="en" className={`${spaceGrotesk.className}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const stored = localStorage.getItem('theme');
+                if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="antialiased tracking-tight">
         <div className="min-h-screen dark:bg-zinc-950 bg-white text-gray-900 dark:text-zinc-200">
           <div className="flex flex-col md:flex-row max-w-5xl mx-auto">
@@ -48,6 +63,11 @@ export default function RootLayout({
             </main>
           </div>
           <Analytics />
+          
+          {/* Theme Toggle - Fixed bottom right */}
+          <div className="fixed bottom-6 right-6">
+            <ThemeToggle />
+          </div>
         </div>
       </body>
     </html>
@@ -77,7 +97,7 @@ function Sidebar() {
         </nav>
         
         {/* Social Links */}
-        <div className="flex flex-row md:flex-col gap-3 md:mt-auto md:pt-8">
+        <div className="flex flex-row md:flex-col gap-3">
           {socialLinks.map((link) => (
             <a
               key={link.name}
